@@ -50,7 +50,9 @@
         dragActive ? "border-primary bg-primary/10" : "border-muted-foreground/25 hover:border-primary/50 hover:bg-primary/5",
         "relative"
     )}
-    role="dropzone"
+    role="button"
+    tabindex="0"
+    aria-label="Drop zone for image upload"
     ondragenter={handleDrag}
     ondragleave={handleDrag}
     ondragover={handleDrag}
