@@ -14,6 +14,23 @@
     const handleReset = () => {
         dispatch('reset');
     };
+
+    const handleDownload = async () => {
+        try {
+            const response = await fetch(faviconUrl);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'favicon.ico';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Error downloading favicon:', error);
+        }
+    };
 </script>
 
 <div class="text-center" in:fade>
@@ -27,10 +44,8 @@
         <Button onclick={handleReset}>
             Create Another
         </Button>
-        <a href={faviconUrl} download="favicon.ico">
-            <Button>
-                Download Favicon
-            </Button>
-        </a>
+        <Button onclick={handleDownload}>
+            Download Favicon
+        </Button>
     </div>
 </div> 

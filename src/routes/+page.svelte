@@ -1,6 +1,5 @@
 <script lang="ts">
     import { fly } from 'svelte/transition';
-    import { supabase } from '$lib/supabase';
     import DropZone from '$lib/components/DropZone.svelte';
     import ErrorMessage from '$lib/components/ErrorMessage.svelte';
     import ImageCropper from '$lib/components/ImageCropper.svelte';
@@ -12,11 +11,17 @@
     let error = $state('');
 
     const processImage = async (imageData: HTMLCanvasElement | HTMLImageElement) => {
+        console.log('🎯 Starting image processing', {
+            type: imageData instanceof HTMLCanvasElement ? 'canvas' : 'image'
+        });
         try {
             processing = true;
             error = '';
+            // Clear file state immediately when processing starts
+            file = null;
 
             // Convert to blob
+            console.log('🔄 Converting to blob...');
             const blob = await new Promise<Blob>((resolve) => {
                 if (imageData instanceof HTMLCanvasElement) {
                     imageData.toBlob((b) => resolve(b!), 'image/png');
@@ -29,32 +34,32 @@
                     canvas.toBlob((b) => resolve(b!), 'image/png');
                 }
             });
+            console.log('✅ Blob created, size:', `${(blob.size / 1024).toFixed(2)}KB`);
 
-            // Upload to Supabase
-            const fileName = `original-${Date.now()}.png`;
-            const { error: uploadError } = await supabase.storage
-                .from('favicons')
-                .upload(fileName, blob);
+            // Create form data
+            console.log('📝 Creating FormData...');
+            const formData = new FormData();
+            formData.append('image', blob, 'image.png');
 
-            if (uploadError) throw uploadError;
-
-            // Get public URL
-            const { data: { publicUrl } } = supabase.storage
-                .from('favicons')
-                .getPublicUrl(fileName);
-
-            // Process the image
+            // Send to server for processing
+            console.log('📤 Sending to server...');
             const response = await fetch('/api/process-favicon', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ imageUrl: publicUrl })
+                body: formData
             });
 
+            console.log('📥 Received server response:', response.status);
             const result = await response.json();
-            if (!result.success) throw new Error(result.error);
+            
+            if (!result.success) {
+                console.error('❌ Server processing failed:', result.error);
+                throw new Error(result.error);
+            }
 
+            console.log('✅ Processing complete, favicon URL:', result.faviconUrl);
             faviconUrl = result.faviconUrl;
         } catch (e) {
+            console.error('❌ Error in processImage:', e);
             error = e instanceof Error ? e.message : 'An error occurred';
         } finally {
             processing = false;
@@ -62,21 +67,30 @@
     };
 
     const handleFile = async (uploadedFile: File) => {
+        console.log('📁 File received:', {
+            type: uploadedFile.type,
+            size: `${(uploadedFile.size / 1024).toFixed(2)}KB`
+        });
+
         if (!uploadedFile.type.startsWith('image/')) {
+            console.error('❌ Invalid file type:', uploadedFile.type);
             error = 'Please upload an image file';
             return;
         }
         error = '';
 
         // Check if image is square
+        console.log('📐 Checking image dimensions...');
         const img = new Image();
         img.onload = () => {
             URL.revokeObjectURL(img.src);
+            console.log('📏 Image dimensions:', { width: img.width, height: img.height });
+            
             if (img.width === img.height) {
-                // If square, process immediately
+                console.log('✅ Image is square, processing immediately');
                 processImage(img);
             } else {
-                // If not square, show cropper
+                console.log('ℹ️ Image needs cropping, showing cropper');
                 file = uploadedFile;
             }
         };
@@ -84,10 +98,12 @@
     };
 
     const handleProcess = async ({ detail: { canvas } }: CustomEvent<{ canvas: HTMLCanvasElement }>) => {
+        console.log('🖼️ Processing cropped image');
         await processImage(canvas);
     };
 
     const handleReset = () => {
+        console.log('🔄 Resetting state');
         file = null;
         faviconUrl = '';
         error = '';
@@ -106,10 +122,13 @@
     <ErrorMessage message={error} />
 
     {#if !file && !processing && !faviconUrl}
-        <DropZone onfileSelected={e => handleFile(e.detail)} />
+        <DropZone on:fileSelected={(e) => {
+            console.log('📁 File selected');
+            handleFile(e.detail);
+        }} />
     {:else if file && !faviconUrl}
-        <ImageCropper {file} {processing} oncancel={handleReset} onprocess={handleProcess} />
+        <ImageCropper {file} {processing} on:cancel={handleReset} on:process={handleProcess} />
     {:else}
-        <FaviconResult {faviconUrl} onreset={handleReset} />
+        <FaviconResult {faviconUrl} on:reset={handleReset} />
     {/if}
 </main>

@@ -50,6 +50,7 @@
         dragActive ? "border-primary bg-primary/10" : "border-muted-foreground/25 hover:border-primary/50 hover:bg-primary/5",
         "relative"
     )}
+    role="dropzone"
     ondragenter={handleDrag}
     ondragleave={handleDrag}
     ondragover={handleDrag}
