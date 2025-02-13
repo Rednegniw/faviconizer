@@ -1,8 +1,10 @@
 import { supabase } from './supabase';
 
+const CLEANUP_INTERVAL = 10 * 60 * 1000; // 10 minutes
+
 export const cleanupOldFavicons = async () => {
     try {
-        const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+        const cleanupIntervalAgo = new Date(Date.now() - CLEANUP_INTERVAL);
 
         // List all files in the favicons bucket
         const { data: files, error: listError } = await supabase.storage
@@ -11,13 +13,13 @@ export const cleanupOldFavicons = async () => {
 
         if (listError) throw listError;
 
-        // Filter files older than 30 minutes
+        // Filter files older than the cleanup interval
         const oldFiles = files?.filter(file => {
             const createdAt = new Date(file.created_at);
-            return createdAt < thirtyMinutesAgo;
+            return createdAt < cleanupIntervalAgo;
         });
 
-        if (oldFiles && oldFiles.length > 0) {
+        if (oldFiles?.length > 0) {
             // Delete old files
             const { error: deleteError } = await supabase.storage
                 .from('favicons')

@@ -1,85 +1,115 @@
 <script lang="ts">
-    import { Button } from '$lib/components/ui/button';
-    import { cn } from '$lib/utils';
-    import { fade } from 'svelte/transition';
-    import { createEventDispatcher } from 'svelte';
+	import { Button } from '$lib/components/ui/button';
+	import { cn } from '$lib/utils';
+	import { Download, FileUp } from 'lucide-svelte';
+	import { fade } from 'svelte/transition';
+	import LogoImage from './LogoImage.svelte';
 
-    const dispatch = createEventDispatcher<{
-        fileSelected: File;
-    }>();
+	const { onfileSelected } = $props<{
+		onfileSelected: (file: File) => void;
+	}>();
 
-    let dragActive = $state(false);
+	let dragActive = $state(false);
 
-    const handleDrag = (e: DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (e.type === 'dragenter' || e.type === 'dragover') {
-            if (e.dataTransfer?.types.includes('Files')) {
-                dragActive = true;
-            }
-        } else if (e.type === 'dragleave') {
-            dragActive = false;
-        }
-    };
+	const handleDrag = (e: DragEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
 
-    const handleDrop = async (e: DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        dragActive = false;
+		console.log('handleDrag', e.type);
 
-        if (e.dataTransfer?.files && e.dataTransfer.files[0]) {
-            dispatch('fileSelected', e.dataTransfer.files[0]);
-        }
-    };
+		if (e.type === 'dragenter' || e.type === 'dragover') {
+			/**
+			 * If the user is dragging a file and the file is an image,
+			 * we want to show an overlay.
+			 */
+			if (e.dataTransfer?.types.includes('Files')) {
+				dragActive = true;
+			}
+		}
+		if (e.type === 'dragleave') {
+			dragActive = false;
+		}
+	};
 
-    const handleFileInput = async (e: Event) => {
-        const input = e.target as HTMLInputElement;
-        if (input.files?.[0]) {
-            dispatch('fileSelected', input.files[0]);
-        }
-    };
+	const handleDragEnd = () => {
+		dragActive = false;
+	};
 
-    const handleClick = () => {
-        document.getElementById('file-upload')?.click();
-    };
+	const handleDrop = async (e: DragEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+
+		dragActive = false;
+
+		if (e.dataTransfer?.files && e.dataTransfer.files[0]) {
+			onfileSelected(e.dataTransfer.files[0]);
+		}
+	};
+
+	const handleFileSelectClick = () => {
+		const input = document.getElementById('file-input');
+
+		if (input) {
+			input.click();
+		}
+	};
+
+	const handleFileSelectChange = (e: Event) => {
+		if (e.target && e.target instanceof HTMLInputElement && e.target.files && e.target.files[0]) {
+			onfileSelected(e.target.files[0]);
+		}
+	};
 </script>
 
-<div 
-    class={cn(
-        "w-full max-w-2xl p-8 rounded-lg border-2 border-dashed transition-all duration-300",
-        dragActive ? "border-primary bg-primary/10" : "border-muted-foreground/25 hover:border-primary/50 hover:bg-primary/5",
-        "relative"
-    )}
-    role="button"
-    tabindex="0"
-    aria-label="Drop zone for image upload"
-    ondragenter={handleDrag}
-    ondragleave={handleDrag}
-    ondragover={handleDrag}
-    ondrop={handleDrop}
+<div
+	class={cn("px-4 fixed left-0 top-0 flex h-screen w-screen flex-col items-center justify-center gap-6", "md:p-0")}
+	ondragenter={handleDrag}
+	ondragover={handleDrag}
+	ondragleave={handleDrag}
+	ondragend={handleDragEnd}
+	ondrop={handleDrop}
+	role="button"
+	tabindex="0"
+	aria-label="Drop zone for image upload"
 >
-    <div class="text-center" in:fade>
-        <div class="mb-4">
-            <svg class={cn(
-                "mx-auto h-12 w-12 transition-colors duration-200",
-                dragActive ? "text-primary" : "text-muted-foreground"
-            )} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3 3m0 0l-3-3m3 3V8" />
-            </svg>
-        </div>
-        <p class="text-lg mb-2 transition-opacity duration-200">
-            {dragActive ? "Drop your image here to convert it to .ico" : "Drop your image here"}
-        </p>
-        <p class="text-sm text-muted-foreground mb-4">or click to select</p>
-        <input
-            type="file"
-            accept="image/*"
-            class="hidden"
-            onchange={handleFileInput}
-            id="file-upload"
-        />
-        <Button variant="outline" onclick={handleClick}>
-            Select Image
-        </Button>
-    </div>
-</div> 
+	<div
+		class={cn(
+			'fixed left-0 top-0 -z-10 flex h-screen w-screen flex-col items-center justify-center space-y-6 bg-background opacity-0 transition-opacity duration-100',
+			dragActive && 'z-10 opacity-100'
+		)}
+	>
+		<LogoImage size={100} />
+
+		<div class="flex items-center justify-center gap-2">
+			<Download class="size-7" />
+			<h1 class="text-2xl font-bold">Drop your image anywhere</h1>
+		</div>
+
+		<div class="space-y-4 text-center">
+			<p>If it's roughly square, it will be converted to a favicon automatically.</p>
+			<p>Otherwise, you will be able to crop it to a square.</p>
+		</div>
+	</div>
+
+	<LogoImage size={100} />
+
+	<h1 class="text-3xl font-bold">Faviconizer</h1>
+
+	<div class="space-y-4 text-center">
+		<p>Drag your image anywhere to convert it to a favicon.</p>
+	</div>
+
+	<input
+		type="file"
+		accept="image/*"
+		class="hidden"
+		id="file-input"
+		onchange={handleFileSelectChange}
+		tabindex="-1"
+	/>
+
+	<Button onclick={handleFileSelectClick} variant="outline">
+		<FileUp class="h-4 w-4" />
+		<span>...or select an image from your computer.</span>
+	</Button>
+</div>
