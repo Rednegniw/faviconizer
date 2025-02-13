@@ -5,6 +5,7 @@
 	import { toast } from 'svelte-sonner';
     import autoAnimate from '@formkit/auto-animate';
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
+    import { faviconSize } from '$lib/stores';
 
     let file: File | null = $state(null);
     let faviconUrl = $state('');
@@ -26,10 +27,11 @@
                 } else {
                     console.log('🔄 Converting image to blob...');
                     const canvas = document.createElement('canvas');
-                    canvas.width = 64;
-                    canvas.height = 64;
+                    const size = $faviconSize;
+                    canvas.width = size;
+                    canvas.height = size;
                     const ctx = canvas.getContext('2d')!;
-                    ctx.drawImage(imageData, 0, 0, 64, 64);
+                    ctx.drawImage(imageData, 0, 0, size, size);
                     canvas.toBlob((b) => resolve(b!), 'image/png');
                 }
             });
@@ -40,6 +42,7 @@
             console.log('📝 Creating FormData...');
             const formData = new FormData();
             formData.append('image', blob, 'image.png');
+            formData.append('size', $faviconSize.toString());
 
             // Send to server for processing
             console.log('📤 Sending to server...');

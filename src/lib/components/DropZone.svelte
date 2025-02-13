@@ -2,10 +2,10 @@
 	import { Button } from '$lib/components/ui/button';
 	import { cn } from '$lib/utils';
 	import { Download, FileUp } from 'lucide-svelte';
-	import { fade } from 'svelte/transition';
 	import LogoImage from './LogoImage.svelte';
 	import posthog from 'posthog-js';
-
+	import SizeSelector from './SizeSelector.svelte';
+	
 	const { onfileSelected } = $props<{
 		onfileSelected: (file: File) => void;
 	}>();
@@ -122,8 +122,11 @@
 		tabindex="-1"
 	/>
 
-	<Button onclick={handleFileSelectClick} variant="outline">
-		<FileUp class="h-4 w-4" />
-		<span>...or select an image from your computer.</span>
-	</Button>
+	<div class="flex flex-col items-center gap-4">
+		<Button onclick={handleFileSelectClick} variant="outline">
+			<FileUp class="h-4 w-4" />
+			<span>...or select an image from your device</span>
+		</Button>
+		<SizeSelector />
+	</div>
 </div>

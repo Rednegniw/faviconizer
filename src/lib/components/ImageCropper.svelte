@@ -3,6 +3,7 @@
     import { fade } from 'svelte/transition';
     import Cropper from 'cropperjs';
     import 'cropperjs/dist/cropper.css';
+    import { faviconSize } from '$lib/stores';
 
     const { onCancel, onProcess, file, processing = false } = $props<{
         file: File | null;
@@ -28,9 +29,10 @@
 
     const handleProcess = () => {
         if (!cropper) return;
+        const size = $faviconSize;
         const canvas = cropper.getCroppedCanvas({
-            width: 64,
-            height: 64
+            width: size,
+            height: size
         });
         onProcess(canvas);
     };

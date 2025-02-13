@@ -5,7 +5,6 @@ import { checkRateLimit } from '$lib/ratelimit';
 
 const SUPABASE_BUCKET = 'favicons';
 const SUPABASE_CACHE_CONTROL = '1800';
-const FAVICON_SIZE = 64;
 
 export const POST = async ({ request, getClientAddress }) => {
     console.log('🚀 Starting favicon processing request');
@@ -27,6 +26,7 @@ export const POST = async ({ request, getClientAddress }) => {
         console.log('📥 Extracting file from form data...');
         const formData = await request.formData();
         const file = formData.get('image') as File;
+        const size = Number(formData.get('size')) || 64;
         
         if (!file) {
             console.error('❌ No image file found in request');
@@ -35,7 +35,8 @@ export const POST = async ({ request, getClientAddress }) => {
         
         console.log('✅ File received:', { 
             type: file.type, 
-            size: `${(file.size / 1024).toFixed(2)}KB` 
+            size: `${(file.size / 1024).toFixed(2)}KB`,
+            targetSize: size
         });
 
         // Convert file to buffer
@@ -47,7 +48,7 @@ export const POST = async ({ request, getClientAddress }) => {
         // Process the image with Sharp
         console.log('🎨 Processing image with Sharp...');
         const processedBuffer = await sharp(buffer)
-            .resize(FAVICON_SIZE, FAVICON_SIZE, {
+            .resize(size, size, {
                 fit: 'contain',
                 background: { r: 0, g: 0, b: 0, alpha: 0 }
             })
