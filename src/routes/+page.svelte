@@ -3,7 +3,8 @@
     import ImageCropper from '$lib/components/ImageCropper.svelte';
     import FaviconResult from '$lib/components/FaviconResult.svelte';
 	import { toast } from 'svelte-sonner';
-	import Button from '$lib/components/ui/button/button.svelte';
+    import autoAnimate from '@formkit/auto-animate';
+	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
 
     let file: File | null = $state(null);
     let faviconUrl = $state('');
@@ -118,7 +119,7 @@
     <title>Faviconizer - Convert your image to a favicon</title>
 </svelte:head>
 
-<main class="min-h-screen flex flex-col items-center justify-center p-4 bg-background">
+<main class="min-h-screen flex flex-col items-center justify-center p-4 bg-background" use:autoAnimate>
     {#if status === 'beforeupload'}
         <DropZone onfileSelected={handleFileUpload} />
     {:else if status === 'cropping'}
@@ -130,4 +131,5 @@
     {:else if status === 'success'}
         <FaviconResult {faviconUrl} onReset={handleReset} />
     {/if}
+    <ThemeToggle />
 </main>

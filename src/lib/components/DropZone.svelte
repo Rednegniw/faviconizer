@@ -4,12 +4,22 @@
 	import { Download, FileUp } from 'lucide-svelte';
 	import { fade } from 'svelte/transition';
 	import LogoImage from './LogoImage.svelte';
+	import posthog from 'posthog-js';
 
 	const { onfileSelected } = $props<{
 		onfileSelected: (file: File) => void;
 	}>();
 
 	let dragActive = $state(false);
+
+	const trackImageUpload = (file: File) => {
+		posthog.capture('image_upload', {
+			file_name: file.name,
+			file_size: file.size,
+			file_type: file.type,
+			upload_method: dragActive ? 'drag_and_drop' : 'file_select'
+		});
+	};
 
 	const handleDrag = (e: DragEvent) => {
 		e.preventDefault();
@@ -42,7 +52,9 @@
 		dragActive = false;
 
 		if (e.dataTransfer?.files && e.dataTransfer.files[0]) {
-			onfileSelected(e.dataTransfer.files[0]);
+			const file = e.dataTransfer.files[0];
+			trackImageUpload(file);
+			onfileSelected(file);
 		}
 	};
 
@@ -56,7 +68,9 @@
 
 	const handleFileSelectChange = (e: Event) => {
 		if (e.target && e.target instanceof HTMLInputElement && e.target.files && e.target.files[0]) {
-			onfileSelected(e.target.files[0]);
+			const file = e.target.files[0];
+			trackImageUpload(file);
+			onfileSelected(file);
 		}
 	};
 </script>
@@ -64,7 +78,7 @@
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-	class={cn("px-4 fixed left-0 top-0 flex h-screen w-screen flex-col items-center justify-center gap-6", "md:p-0")}
+	class={cn("px-4 fixed left-0 top-0 flex h-screen w-screen flex-col items-center justify-center gap-8", "md:p-0")}
 	ondragenter={handleDrag}
 	ondragover={handleDrag}
 	ondragleave={handleDrag}
@@ -93,7 +107,7 @@
 
 	<LogoImage size={100} />
 
-	<h1 class="text-3xl font-bold">Faviconizer</h1>
+	<h1 class="text-4xl font-bold">Faviconizer</h1>
 
 	<div class="space-y-4 text-center">
 		<p>Drag your image anywhere to convert it to a favicon.</p>
