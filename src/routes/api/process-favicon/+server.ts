@@ -1,14 +1,28 @@
 import { json } from '@sveltejs/kit';
 import sharp from 'sharp';
 import { supabase } from '$lib/supabase';
+import { checkRateLimit } from '$lib/ratelimit';
 
 const SUPABASE_BUCKET = 'favicons';
 const SUPABASE_CACHE_CONTROL = '1800';
 const FAVICON_SIZE = 64;
 
-export const POST = async ({ request }) => {
+export const POST = async ({ request, getClientAddress }) => {
     console.log('🚀 Starting favicon processing request');
     try {
+        // Check rate limit first
+        const clientIp = getClientAddress();
+        console.log('🔒 Checking rate limit for IP:', clientIp);
+        const isAllowed = await checkRateLimit(clientIp);
+        
+        if (!isAllowed) {
+            console.log('❌ Rate limit exceeded for IP:', clientIp);
+            return json({ 
+                success: false, 
+                error: 'You are trying to upload too many files. Please try later' 
+            }, { status: 429 });
+        }
+
         // Get the file from the request
         console.log('📥 Extracting file from form data...');
         const formData = await request.formData();

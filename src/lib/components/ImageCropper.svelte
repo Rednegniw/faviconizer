@@ -39,7 +39,7 @@
 <div class="relative aspect-square max-w-md mx-auto" in:fade>
     <img
         bind:this={imageElement}
-        src={URL.createObjectURL(file)}
+        src={file ? URL.createObjectURL(file) : ''}
         alt="Upload preview"
         class="max-w-full"
     />

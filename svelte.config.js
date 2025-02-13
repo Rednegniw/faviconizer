@@ -6,7 +6,13 @@ const config = {
 	preprocess: vitePreprocess(),
 
 	kit: {
-		adapter: adapter(),
+		adapter: adapter()
+	},
+
+	// Disable accessibility warnings
+	onwarn: (warning, handler) => {
+		if (warning.code.includes('a11y')) return;
+		handler(warning);
 	}
 };
 

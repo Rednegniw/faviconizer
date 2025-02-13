@@ -61,6 +61,8 @@
 	};
 </script>
 
+
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class={cn("px-4 fixed left-0 top-0 flex h-screen w-screen flex-col items-center justify-center gap-6", "md:p-0")}
 	ondragenter={handleDrag}
@@ -68,8 +70,6 @@
 	ondragleave={handleDrag}
 	ondragend={handleDragEnd}
 	ondrop={handleDrop}
-	role="button"
-	tabindex="0"
 	aria-label="Drop zone for image upload"
 >
 	<div

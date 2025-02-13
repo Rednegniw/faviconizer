@@ -3,6 +3,7 @@
     import ImageCropper from '$lib/components/ImageCropper.svelte';
     import FaviconResult from '$lib/components/FaviconResult.svelte';
 	import { toast } from 'svelte-sonner';
+	import Button from '$lib/components/ui/button/button.svelte';
 
     let file: File | null = $state(null);
     let faviconUrl = $state('');
@@ -78,7 +79,6 @@
             return;
         }
 
-        // Check if image is square
         console.log('📐 Checking image dimensions...');
         const img = new Image();
         img.onload = () => {
@@ -112,13 +112,6 @@
         faviconUrl = '';
         status = 'beforeupload';
     };
-
-    $effect(() => {
-        if (status === 'error') {
-            toast.error('An error occurred. Please try again.');
-        }
-        console.log('🔄 Status:', status);
-    });
 </script>
 
 <svelte:head>
@@ -128,8 +121,12 @@
 <main class="min-h-screen flex flex-col items-center justify-center p-4 bg-background">
     {#if status === 'beforeupload'}
         <DropZone onfileSelected={handleFileUpload} />
-    {:else if status === 'cropping' || status === 'processing'}
+    {:else if status === 'cropping'}
         <ImageCropper onCancel={handleReset} onProcess={processImage} file={file} />
+    {:else if status === 'processing'}
+        <div class="flex flex-col items-center justify-center">
+            <p>Processing...</p>
+        </div>
     {:else if status === 'success'}
         <FaviconResult {faviconUrl} onReset={handleReset} />
     {/if}
