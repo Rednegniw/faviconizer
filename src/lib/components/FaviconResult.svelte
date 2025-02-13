@@ -1,18 +1,16 @@
 <script lang="ts">
     import { Button } from '$lib/components/ui/button';
+	import { cn } from '$lib/utils';
+	import { DownloadIcon } from 'lucide-svelte';
     import { fade } from 'svelte/transition';
-    import { createEventDispatcher } from 'svelte';
 
-    const dispatch = createEventDispatcher<{
-        reset: void;
-    }>();
-
-    let { faviconUrl } = $props<{
+    let { faviconUrl, onReset } = $props<{
         faviconUrl: string;
+        onReset: () => void;
     }>();
 
     const handleReset = () => {
-        dispatch('reset');
+        onReset();
     };
 
     const handleDownload = async () => {
@@ -33,19 +31,22 @@
     };
 </script>
 
-<div class="text-center" in:fade>
+<div class="text-center flex flex-col items-center space-y-8" in:fade>
     <img
         src={faviconUrl}
         alt="Generated favicon"
-        class="w-16 h-16 mx-auto mb-4"
+        class={cn("size-[64px] rounded-lg shadow-md cursor-pointer", "hover:scale-105 transition-transform duration-300 ease-in-out")}
+        onclick={handleDownload}
     />
-    <p class="mb-4">Your favicon is ready!</p>
-    <div class="flex justify-center gap-4">
-        <Button onclick={handleReset}>
-            Create Another
+    <p class="mb-4 text-lg font-semibold">Your favicon is ready!</p>
+    <div class="space-y-4">
+        <Button onclick={handleDownload} class="flex items-center gap-4 px-24" variant="outline">
+            <DownloadIcon class="size-4 mr-2" />
+            <span>Download</span>
         </Button>
-        <Button onclick={handleDownload}>
-            Download Favicon
+        <Button onclick={handleReset} variant="ghost">
+            ...or create another
         </Button>
+        
     </div>
 </div> 

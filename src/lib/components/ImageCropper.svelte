@@ -3,31 +3,26 @@
     import { fade } from 'svelte/transition';
     import Cropper from 'cropperjs';
     import 'cropperjs/dist/cropper.css';
-    import { createEventDispatcher } from 'svelte';
 
-    const dispatch = createEventDispatcher<{
-        cancel: void;
-        process: { canvas: HTMLCanvasElement };
-    }>();
-
-    let { file, processing = false } = $props<{
-        file: File;
+    const { onCancel, onProcess, file, processing = false } = $props<{
+        file: File | null;
         processing?: boolean;
+        onCancel: () => void;
+        onProcess: (canvas: HTMLCanvasElement) => void;
     }>();
 
     let cropper: Cropper | null = $state(null);
     let imageElement: HTMLImageElement;
 
     $effect(() => {
-        if (imageElement && file) {
-            cropper?.destroy();
+        if (!cropper) {
             cropper = new Cropper(imageElement, {
                 aspectRatio: 1,
                 viewMode: 2,
                 dragMode: 'move',
                 background: false,
                 autoCropArea: 1
-            });
+            });  
         }
     });
 
@@ -37,7 +32,7 @@
             width: 64,
             height: 64
         });
-        dispatch('process', { canvas });
+        onProcess(canvas);
     };
 </script>
 
@@ -53,7 +48,7 @@
             variant="outline" 
             onclick={() => {
                 cropper?.destroy();
-                dispatch('cancel');
+                onCancel();
             }}
         >
             Cancel

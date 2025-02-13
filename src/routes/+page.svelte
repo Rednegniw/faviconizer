@@ -1,13 +1,11 @@
 <script lang="ts">
     import DropZone from '$lib/components/DropZone.svelte';
-    import ErrorMessage from '$lib/components/ErrorMessage.svelte';
     import ImageCropper from '$lib/components/ImageCropper.svelte';
     import FaviconResult from '$lib/components/FaviconResult.svelte';
 	import { toast } from 'svelte-sonner';
 
     let file: File | null = $state(null);
     let faviconUrl = $state('');
-    let error = $state('');
     let status = $state<'beforeupload' | 'cropping' | 'processing' | 'success' | 'error'>('beforeupload');
 
     const processImage = async (imageData: HTMLCanvasElement | HTMLImageElement) => {
@@ -15,9 +13,8 @@
             type: imageData instanceof HTMLCanvasElement ? 'canvas' : 'image'
         });
         try {
-            status = 'processing';
-            error = '';
-
+            status = 'processing'
+            
             // Convert to blob
             console.log('🔄 Converting to blob...');
             const blob = await new Promise<Blob>((resolve) => {
@@ -65,8 +62,7 @@
             console.error('❌ Error in processImage:', e);
 
             status = 'error';
-
-            error = e instanceof Error ? e.message : 'An error occurred';
+            toast.error('An error occurred. Please try again.');
         }
     };
 
@@ -106,6 +102,7 @@
                 status = 'cropping';
             }
         };
+
         img.src = URL.createObjectURL(uploadedFile);
     };
 
@@ -113,8 +110,15 @@
         console.log('🔄 Resetting state');
         file = null;
         faviconUrl = '';
-        error = '';
+        status = 'beforeupload';
     };
+
+    $effect(() => {
+        if (status === 'error') {
+            toast.error('An error occurred. Please try again.');
+        }
+        console.log('🔄 Status:', status);
+    });
 </script>
 
 <svelte:head>
@@ -124,13 +128,9 @@
 <main class="min-h-screen flex flex-col items-center justify-center p-4 bg-background">
     {#if status === 'beforeupload'}
         <DropZone onfileSelected={handleFileUpload} />
-    {:else if status === 'cropping'}
-        <ImageCropper on:cancel={handleReset} on:process={({detail: { canvas }}) => processImage(canvas)} />
-    {:else if status === 'processing'}
-        <FaviconResult {faviconUrl} on:reset={handleReset} />
+    {:else if status === 'cropping' || status === 'processing'}
+        <ImageCropper onCancel={handleReset} onProcess={processImage} file={file} />
     {:else if status === 'success'}
-        <FaviconResult {faviconUrl} on:reset={handleReset} />
-    {:else if status === 'error'}
-        <ErrorMessage message={error} />
+        <FaviconResult {faviconUrl} onReset={handleReset} />
     {/if}
 </main>

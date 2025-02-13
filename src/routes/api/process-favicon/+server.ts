@@ -2,6 +2,10 @@ import { json } from '@sveltejs/kit';
 import sharp from 'sharp';
 import { supabase } from '$lib/supabase';
 
+const SUPABASE_BUCKET = 'favicons';
+const SUPABASE_CACHE_CONTROL = '1800';
+const FAVICON_SIZE = 64;
+
 export const POST = async ({ request }) => {
     console.log('🚀 Starting favicon processing request');
     try {
@@ -14,6 +18,7 @@ export const POST = async ({ request }) => {
             console.error('❌ No image file found in request');
             throw new Error('No image provided');
         }
+        
         console.log('✅ File received:', { 
             type: file.type, 
             size: `${(file.size / 1024).toFixed(2)}KB` 
@@ -28,7 +33,7 @@ export const POST = async ({ request }) => {
         // Process the image with Sharp
         console.log('🎨 Processing image with Sharp...');
         const processedBuffer = await sharp(buffer)
-            .resize(64, 64, {
+            .resize(FAVICON_SIZE, FAVICON_SIZE, {
                 fit: 'contain',
                 background: { r: 0, g: 0, b: 0, alpha: 0 }
             })
@@ -40,10 +45,10 @@ export const POST = async ({ request }) => {
         const fileName = `favicon-${Date.now()}.ico`;
         console.log('☁️ Uploading to Supabase:', fileName);
         const { error: uploadError } = await supabase.storage
-            .from('favicons')
+            .from(SUPABASE_BUCKET)
             .upload(fileName, processedBuffer, {
                 contentType: 'image/x-icon',
-                cacheControl: '1800' // 30 minutes
+                cacheControl: SUPABASE_CACHE_CONTROL
             });
 
         if (uploadError) {
@@ -55,7 +60,7 @@ export const POST = async ({ request }) => {
         // Get the public URL
         console.log('🔗 Generating public URL...');
         const { data: { publicUrl } } = supabase.storage
-            .from('favicons')
+            .from(SUPABASE_BUCKET)
             .getPublicUrl(fileName);
         console.log('✅ Public URL generated:', publicUrl);
 
