@@ -2,6 +2,7 @@
     import { Button } from '$lib/components/ui/button';
 	import { cn } from '$lib/utils';
 	import { DownloadIcon } from 'lucide-svelte';
+	import { onMount } from 'svelte';
     import { fade } from 'svelte/transition';
 
     let { faviconUrl, onReset } = $props<{
@@ -29,6 +30,10 @@
             console.error('Error downloading favicon:', error);
         }
     };
+
+    onMount(() => {
+        handleDownload();
+    });
 </script>
 
 <div class="text-center flex flex-col items-center space-y-8" in:fade>
@@ -38,7 +43,10 @@
         class={cn("size-[64px] rounded-lg shadow-md cursor-pointer", "hover:scale-105 transition-transform duration-300 ease-in-out")}
         onclick={handleDownload}
     />
-    <p class="mb-4 text-lg font-semibold">Your favicon is ready!</p>
+    <div class="flex flex-col items-center gap-2">
+        <p class="text-lg font-semibold">Your favicon is ready!</p>
+        <span class="text-sm text-muted-foreground">It should be downloaded automatically.</span>
+    </div>
     <div class="space-y-4">
         <Button onclick={handleDownload} class="flex items-center gap-4 px-24" variant="outline">
             <DownloadIcon class="size-4 mr-2" />
