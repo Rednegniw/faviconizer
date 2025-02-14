@@ -6,6 +6,7 @@
 	import { browser } from '$app/environment';
 	import posthog from 'posthog-js';
 	import { PUBLIC_POSTHOG_KEY, PUBLIC_POSTHOG_HOST } from '$env/static/public';
+	import SEO from '$lib/components/SEO.svelte';
 
 	let { children } = $props();
 
@@ -22,6 +23,8 @@
 		}
 	});
 </script>
+
+<SEO />
 
 {@render children()}
 
