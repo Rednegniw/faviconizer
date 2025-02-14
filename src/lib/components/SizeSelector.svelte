@@ -1,7 +1,7 @@
 <!-- A component for selecting the favicon size -->
 <script lang="ts">
 	import { faviconSize } from '$lib/stores';
-	import Separator from './ui/separator/separator.svelte';
+	import { Separator } from './ui/separator';
 	import { z } from 'zod';
 	import { cn } from '$lib/utils';
 	import autoAnimate from '@formkit/auto-animate';

@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store';
 
-export type Theme = 'dark' | 'light';
+type Theme = 'dark' | 'light';
 
 function createThemeStore() {
     // Initialize with the current theme from document class
