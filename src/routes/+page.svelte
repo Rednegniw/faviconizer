@@ -6,6 +6,7 @@
     import autoAnimate from '@formkit/auto-animate';
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
     import { faviconSize } from '$lib/stores';
+	import LoadingState from '$lib/components/LoadingState.svelte';
 
     let file: File | null = $state(null);
     let faviconUrl = $state('');
@@ -128,9 +129,7 @@
     {:else if status === 'cropping'}
         <ImageCropper onCancel={handleReset} onProcess={processImage} file={file} />
     {:else if status === 'processing'}
-        <div class="flex flex-col items-center justify-center">
-            <p>Processing...</p>
-        </div>
+        <LoadingState file={file} />
     {:else if status === 'success'}
         <FaviconResult {faviconUrl} onReset={handleReset} />
     {/if}
