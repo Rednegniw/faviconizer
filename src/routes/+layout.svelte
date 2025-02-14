@@ -24,4 +24,5 @@
 </script>
 
 {@render children()}
+
 <Toaster />
