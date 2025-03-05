@@ -1,9 +1,19 @@
+import { sentrySvelteKit } from '@sentry/sveltekit';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { enhancedImages } from '@sveltejs/enhanced-img';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-	plugins: [sveltekit(), enhancedImages()],
+	plugins: [
+		sentrySvelteKit({
+			sourceMapsUploadOptions: {
+				org: 'awsoft',
+				project: 'faviconizer'
+			}
+		}),
+		sveltekit(),
+		enhancedImages()
+	],
 	esbuild: {
 		drop: process.env.NODE_ENV === 'production' ? ['console'] : undefined
 	},
