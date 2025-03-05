@@ -5,7 +5,7 @@
 	import { toast } from 'svelte-sonner';
     import autoAnimate from '@formkit/auto-animate';
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
-    import { faviconSize } from '$lib/stores';
+    import { faviconSize, faviconFormat } from '$lib/stores';
 	import LoadingState from '$lib/components/LoadingState.svelte';
 
     let file: File | null = $state(null);
@@ -44,6 +44,7 @@
             const formData = new FormData();
             formData.append('image', blob, 'image.png');
             formData.append('size', $faviconSize.toString());
+            formData.append('format', $faviconFormat);
 
             // Send to server for processing
             console.log('📤 Sending to server...');

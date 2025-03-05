@@ -4,7 +4,8 @@
 	import { Download, FileUp } from 'lucide-svelte';
 	import LogoImage from './LogoImage.svelte';
 	import posthog from 'posthog-js';
-	import SizeSelector from './SizeSelector.svelte';
+	import UploadSettings from './UploadSettings.svelte';
+	import { Separator } from './ui/separator';
 	
 	const { onfileSelected } = $props<{
 		onfileSelected: (file: File) => void;
@@ -122,11 +123,12 @@
 		tabindex="-1"
 	/>
 
-	<div class="flex flex-col items-center gap-4">
+	<div class="flex flex-col items-center gap-10">
 		<Button onclick={handleFileSelectClick} variant="outline">
 			<FileUp class="h-4 w-4" />
 			<span>...or select an image from your device</span>
 		</Button>
-		<SizeSelector />
+		<Separator />
+		<UploadSettings />
 	</div>
 </div>

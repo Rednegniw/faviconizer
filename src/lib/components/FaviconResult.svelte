@@ -4,6 +4,7 @@
 	import { DownloadIcon } from 'lucide-svelte';
 	import { onMount } from 'svelte';
     import { fade } from 'svelte/transition';
+    import { faviconFormat } from '$lib/stores';
 
     let { faviconUrl, onReset } = $props<{
         faviconUrl: string;
@@ -21,7 +22,11 @@
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'favicon.ico';
+            
+            // Determine file extension from the format
+            const format = $faviconFormat;
+            a.download = `favicon.${format}`;
+            
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);

@@ -5,7 +5,7 @@
 - [x] Loading state for favicon generation
 - [x] Dark mode
 - [x] Sentry
-- [ ] Make dark mode work with mode-watcher
-- [ ] Add a "format" option to convert to PNG
+- [x] Add a "format" option to convert to PNG
 - [ ] Clean up mobile styling
+- [ ] Add a test to see if it's working.
 - [ ] Ads

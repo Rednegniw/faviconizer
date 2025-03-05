@@ -49,7 +49,7 @@
 <div class="flex flex-col items-center gap-2" use:autoAnimate>
 	<div
 		class={cn(
-			'flex items-center gap-4 rounded-full border bg-transparent p-2 px-4 text-center text-sm',
+			'flex items-center gap-4 rounded-lg border bg-transparent p-3 px-4 text-center text-sm',
 			error && 'border-destructive'
 		)}
 	>

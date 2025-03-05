@@ -27,6 +27,7 @@ export const POST = async ({ request, getClientAddress }) => {
         const formData = await request.formData();
         const file = formData.get('image') as File;
         const size = Number(formData.get('size')) || 64;
+        const format = (formData.get('format') as 'ico' | 'png' | 'jpg') || 'ico';
         
         if (!file) {
             console.error('❌ No image file found in request');
@@ -36,7 +37,8 @@ export const POST = async ({ request, getClientAddress }) => {
         console.log('✅ File received:', { 
             type: file.type, 
             size: `${(file.size / 1024).toFixed(2)}KB`,
-            targetSize: size
+            targetSize: size,
+            format
         });
 
         // Convert file to buffer
@@ -47,22 +49,43 @@ export const POST = async ({ request, getClientAddress }) => {
 
         // Process the image with Sharp
         console.log('🎨 Processing image with Sharp...');
-        const processedBuffer = await sharp(buffer)
+        const sharpInstance = sharp(buffer)
             .resize(size, size, {
                 fit: 'contain',
                 background: { r: 0, g: 0, b: 0, alpha: 0 }
-            })
-            .toFormat('png')
-            .toBuffer();
-        console.log('✅ Image processed, new size:', `${(processedBuffer.length / 1024).toFixed(2)}KB`);
+            });
+
+        // Convert to the requested format
+        let processedBuffer: Buffer;
+        let contentType: string;
+        let fileExtension: string;
+
+        if (format === 'jpg') {
+            processedBuffer = await sharpInstance
+                .toFormat('jpeg', { quality: 90 })
+                .toBuffer();
+            contentType = 'image/jpeg';
+            fileExtension = 'jpg';
+        } else if (format === 'png') {
+            processedBuffer = await sharpInstance.toFormat('png').toBuffer();
+            contentType = 'image/png';
+            fileExtension = 'png';
+        } else {
+            // Default to ICO
+            processedBuffer = await sharpInstance.toFormat('png').toBuffer();
+            contentType = 'image/x-icon';
+            fileExtension = 'ico';
+        }
+
+        console.log('✅ Image processed, new size:', `${(processedBuffer.length / 1024).toFixed(2)}KB`, 'format:', format);
 
         // Upload the processed favicon
-        const fileName = `favicon-${Date.now()}.ico`;
+        const fileName = `favicon-${Date.now()}.${fileExtension}`;
         console.log('☁️ Uploading to Supabase:', fileName);
         const { error: uploadError } = await supabase.storage
             .from(SUPABASE_BUCKET)
             .upload(fileName, processedBuffer, {
-                contentType: 'image/x-icon',
+                contentType,
                 cacheControl: SUPABASE_CACHE_CONTROL
             });
 
