@@ -7,4 +7,3 @@
 - [x] Sentry
 - [x] Add a "format" option to convert to PNG
 - [x] Clean up mobile styling
-- [ ] Ads
