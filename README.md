@@ -42,7 +42,7 @@ I don't have any further plans for it, but I hope it can be useful to someone!
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/your-username/faviconizer.git
+git clone https://github.com/Rednegniw/faviconizer.git
 cd faviconizer
 ```
 
