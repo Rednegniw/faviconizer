@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Progress from "./ui/progress/progress.svelte";
+	import Progress from './ui/progress/progress.svelte';
 	import { onMount } from 'svelte';
 
 	let progress = $state(0);
@@ -22,14 +22,10 @@
 
 <div class="flex flex-col items-center gap-10">
 	{#if file}
-		<img
-			src={URL.createObjectURL(file)}
-			alt="Loading"
-			class="size-32 rounded-xl shadow-md"
-		/>
+		<img src={URL.createObjectURL(file)} alt="Loading" class="size-32 rounded-xl shadow-md" />
 	{:else}
-		<div class="size-32 rounded-xl shadow-md bg-muted" />
+		<div class="bg-muted size-32 rounded-xl shadow-md" />
 	{/if}
-	<p class="text-sm text-muted-foreground">Processing...</p>
+	<p class="text-muted-foreground text-sm">Processing...</p>
 	<Progress class="h-2" value={progress} />
 </div>

@@ -7,7 +7,7 @@
 <img
 	src={logo}
 	alt="Logo"
-	class="aspect-square rounded-xl overflow-hidden object-cover shadow-md"
+	class="aspect-square overflow-hidden rounded-xl object-cover shadow-md"
 	width={size}
 	height={size}
 />
