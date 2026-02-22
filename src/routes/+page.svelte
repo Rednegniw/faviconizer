@@ -1,138 +1,111 @@
 <script lang="ts">
-    import DropZone from '$lib/components/DropZone.svelte';
-    import ImageCropper from '$lib/components/ImageCropper.svelte';
-    import FaviconResult from '$lib/components/FaviconResult.svelte';
+	import DropZone from '$lib/components/DropZone.svelte';
+	import ImageCropper from '$lib/components/ImageCropper.svelte';
+	import FaviconResult from '$lib/components/FaviconResult.svelte';
 	import { toast } from 'svelte-sonner';
-    import autoAnimate from '@formkit/auto-animate';
+	import autoAnimate from '@formkit/auto-animate';
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
-    import { faviconSize, faviconFormat } from '$lib/stores';
+	import { faviconSize, faviconFormat } from '$lib/stores';
 	import LoadingState from '$lib/components/LoadingState.svelte';
 
-    let file: File | null = $state(null);
-    let faviconUrl = $state('');
-    let status = $state<'beforeupload' | 'cropping' | 'processing' | 'success' | 'error'>('beforeupload');
+	const SQUARE_TOLERANCE = 0.1;
 
-    const processImage = async (imageData: HTMLCanvasElement | HTMLImageElement) => {
-        console.log('🎯 Starting image processing', {
-            type: imageData instanceof HTMLCanvasElement ? 'canvas' : 'image'
-        });
-        try {
-            status = 'processing'
-            
-            // Convert to blob
-            console.log('🔄 Converting to blob...');
-            const blob = await new Promise<Blob>((resolve) => {
-                if (imageData instanceof HTMLCanvasElement) {
-                    console.log('🔄 Converting canvas to blob...');
-                    imageData.toBlob((b) => resolve(b!), 'image/png');
-                } else {
-                    console.log('🔄 Converting image to blob...');
-                    const canvas = document.createElement('canvas');
-                    const size = $faviconSize;
-                    canvas.width = size;
-                    canvas.height = size;
-                    const ctx = canvas.getContext('2d')!;
-                    ctx.drawImage(imageData, 0, 0, size, size);
-                    canvas.toBlob((b) => resolve(b!), 'image/png');
-                }
-            });
+	let file: File | null = $state(null);
+	let faviconUrl = $state('');
+	let status = $state<'beforeupload' | 'cropping' | 'processing' | 'success' | 'error'>(
+		'beforeupload'
+	);
 
-            console.log('✅ Blob created, size:', `${(blob.size / 1024).toFixed(2)}KB`);
+	const processImage = async (imageData: HTMLCanvasElement | HTMLImageElement) => {
+		try {
+			status = 'processing';
 
-            // Create form data
-            console.log('📝 Creating FormData...');
-            const formData = new FormData();
-            formData.append('image', blob, 'image.png');
-            formData.append('size', $faviconSize.toString());
-            formData.append('format', $faviconFormat);
+			const blob = await new Promise<Blob>((resolve) => {
+				if (imageData instanceof HTMLCanvasElement) {
+					imageData.toBlob((b) => resolve(b!), 'image/png');
+				} else {
+					const canvas = document.createElement('canvas');
+					const size = $faviconSize;
+					canvas.width = size;
+					canvas.height = size;
+					const ctx = canvas.getContext('2d')!;
+					ctx.drawImage(imageData, 0, 0, size, size);
+					canvas.toBlob((b) => resolve(b!), 'image/png');
+				}
+			});
 
-            // Send to server for processing
-            console.log('📤 Sending to server...');
-            const response = await fetch('/api/process-favicon', {
-                method: 'POST',
-                body: formData
-            });
+			const formData = new FormData();
+			formData.append('image', blob, 'image.png');
+			formData.append('size', $faviconSize.toString());
+			formData.append('format', $faviconFormat);
 
-            console.log('📥 Received server response:', response.status);
-            const result = await response.json();
-            
-            if (!result.success) {
-                console.error('❌ Server processing failed:', result.error);
-                throw new Error(result.error);
-            }
+			const response = await fetch('/api/process-favicon', {
+				method: 'POST',
+				body: formData
+			});
 
-            console.log('✅ Processing complete, favicon URL:', result.faviconUrl);
-            faviconUrl = result.faviconUrl;
+			const result = await response.json();
 
-            status = 'success';
-        } catch (e) {
-            console.error('❌ Error in processImage:', e);
+			if (!result.success) {
+				throw new Error(result.error);
+			}
 
-            status = 'error';
-            toast.error('An error occurred. Please try again.');
-        }
-    };
+			faviconUrl = result.faviconUrl;
+			status = 'success';
+		} catch (e) {
+			status = 'error';
+			toast.error('An error occurred. Please try again.');
+		}
+	};
 
-    const handleFileUpload = async (uploadedFile: File) => {
-        console.log('📁 File received:', {
-            type: uploadedFile.type,
-            size: `${(uploadedFile.size / 1024).toFixed(2)}KB`
-        });
+	const handleFileUpload = async (uploadedFile: File) => {
+		if (!uploadedFile.type.startsWith('image/')) {
+			toast.error('Please upload an image file');
+			return;
+		}
 
-        if (!uploadedFile.type.startsWith('image/')) {
-            console.error('❌ Invalid file type:', uploadedFile.type);
-            toast.error('Please upload an image file');
-            return;
-        }
+		const img = new Image();
+		img.onload = () => {
+			URL.revokeObjectURL(img.src);
 
-        console.log('📐 Checking image dimensions...');
-        const img = new Image();
-        img.onload = () => {
-            URL.revokeObjectURL(img.src);
-            console.log('📏 Image dimensions:', { width: img.width, height: img.height });
-            
-            const aspectRatio = img.height / img.width;
+			const aspectRatio = img.height / img.width;
+			const isRoughlySquare =
+				aspectRatio >= 1 - SQUARE_TOLERANCE && aspectRatio <= 1 + SQUARE_TOLERANCE;
 
-            /**
-             * Allow 10% deviation from square.
-             * This is to account for some images being slightly non-square.
-             */
-            const isRoughlySquare = aspectRatio >= 0.9 && aspectRatio <= 1.1;
-            
-            if (isRoughlySquare) {
-                console.log('✅ Image is roughly square (within 10% tolerance), processing immediately');
-                processImage(img);
-            } else {
-                console.log('ℹ️ Image needs cropping, showing cropper');
-                file = uploadedFile;
-                status = 'cropping';
-            }
-        };
+			if (isRoughlySquare) {
+				processImage(img);
+			} else {
+				file = uploadedFile;
+				status = 'cropping';
+			}
+		};
 
-        img.src = URL.createObjectURL(uploadedFile);
-    };
+		img.src = URL.createObjectURL(uploadedFile);
+	};
 
-    const handleReset = () => {
-        console.log('🔄 Resetting state');
-        file = null;
-        faviconUrl = '';
-        status = 'beforeupload';
-    };
+	const handleReset = () => {
+		file = null;
+		faviconUrl = '';
+		status = 'beforeupload';
+	};
 </script>
 
 <svelte:head>
-    <title>Faviconizer - Convert your image to a favicon</title>
+	<title>Faviconizer - Convert your image to a favicon</title>
 </svelte:head>
 
-<main class="min-h-screen flex flex-col items-center justify-center p-4 bg-background" use:autoAnimate>
-    {#if status === 'beforeupload'}
-        <DropZone onfileSelected={handleFileUpload} />
-    {:else if status === 'cropping'}
-        <ImageCropper onCancel={handleReset} onProcess={processImage} file={file} />
-    {:else if status === 'processing'}
-        <LoadingState file={file} />
-    {:else if status === 'success'}
-        <FaviconResult {faviconUrl} onReset={handleReset} />
-    {/if}
-    <ThemeToggle />
+<main
+	class="bg-background flex min-h-screen flex-col items-center justify-center p-4"
+	use:autoAnimate
+>
+	{#if status === 'beforeupload'}
+		<DropZone onFileSelected={handleFileUpload} />
+	{:else if status === 'cropping'}
+		<ImageCropper onCancel={handleReset} onProcess={processImage} {file} />
+	{:else if status === 'processing'}
+		<LoadingState {file} />
+	{:else if status === 'success'}
+		<FaviconResult {faviconUrl} onReset={handleReset} />
+	{/if}
+	<ThemeToggle />
 </main>

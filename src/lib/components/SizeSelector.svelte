@@ -1,4 +1,3 @@
-<!-- A component for selecting the favicon size -->
 <script lang="ts">
 	import { faviconSize } from '$lib/stores';
 	import { Separator } from './ui/separator';
@@ -17,8 +16,6 @@
 	let size = $derived($faviconSize);
 	let error = $state<string | null>(null);
 	let inputValue = $state(size.toString());
-
-	$effect(() => console.log('size', size));
 
 	const validate = (value: string) => {
 		try {
@@ -61,9 +58,9 @@
 			class={cn('w-[3ch] bg-transparent p-0 text-center text-sm')}
 		/>
 		<Separator orientation="vertical" />
-		<span class="text-sm text-muted-foreground">px</span>
+		<span class="text-muted-foreground text-sm">px</span>
 	</div>
 	{#if error}
-		<p class="text-xs text-destructive">{error}</p>
+		<p class="text-destructive text-xs">{error}</p>
 	{/if}
 </div>

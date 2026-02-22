@@ -1,6 +1,6 @@
 import { sentrySvelteKit } from '@sentry/sveltekit';
 import { sveltekit } from '@sveltejs/kit/vite';
-import { enhancedImages } from '@sveltejs/enhanced-img';
+import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
@@ -11,12 +11,9 @@ export default defineConfig({
 				project: 'faviconizer'
 			}
 		}),
-		sveltekit(),
-		enhancedImages()
+		tailwindcss(),
+		sveltekit()
 	],
-	esbuild: {
-		drop: process.env.NODE_ENV === 'production' ? ['console'] : undefined
-	},
 	optimizeDeps: {
 		include: ['cropperjs']
 	}

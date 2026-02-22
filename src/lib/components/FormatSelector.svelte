@@ -1,4 +1,3 @@
-<!-- A component for selecting the favicon format -->
 <script lang="ts">
 	import { faviconFormat } from '$lib/stores';
 	import { Separator } from './ui/separator';
@@ -20,7 +19,7 @@
 
 <div class="flex flex-col items-center gap-2" use:autoAnimate>
 	<div class="flex items-center gap-1 rounded-lg border bg-transparent p-2 text-center text-sm">
-		{#each formats as formatOption, i}
+		{#each formats as formatOption, i (formatOption.value)}
 			<button
 				class={cn(
 					'rounded-lg px-3 py-1 transition-colors',
@@ -35,4 +34,4 @@
 			{/if}
 		{/each}
 	</div>
-</div> 
+</div>

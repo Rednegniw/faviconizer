@@ -1,8 +1,8 @@
-<!-- SEO Component for managing all metadata -->
 <script lang="ts">
-	const title = "Faviconizer - Convert your image to a favicon";
-	const description = "Free online tool to convert any image into a favicon. Supports square and non-square images with a built-in cropping tool. Generate favicons in multiple sizes for your website without any hassle.";
-	const url = "https://faviconizer.com";
+	const title = 'Faviconizer - Convert your image to a favicon';
+	const description =
+		'Free online tool to convert any image into a favicon. Supports square and non-square images with a built-in cropping tool. Generate favicons in multiple sizes for your website without any hassle.';
+	const url = 'https://faviconizer.com';
 	const previewImage = `${url}/preview.jpg`;
 </script>
 
@@ -49,4 +49,4 @@
 			]
 		})}
 	</script>
-</svelte:head> 
+</svelte:head>

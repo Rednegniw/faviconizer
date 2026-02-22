@@ -6,9 +6,9 @@
 	import posthog from 'posthog-js';
 	import UploadSettings from './UploadSettings.svelte';
 	import { Separator } from './ui/separator';
-	
-	const { onfileSelected } = $props<{
-		onfileSelected: (file: File) => void;
+
+	const { onFileSelected } = $props<{
+		onFileSelected: (file: File) => void;
 	}>();
 
 	let dragActive = $state(false);
@@ -25,8 +25,6 @@
 	const handleDrag = (e: DragEvent) => {
 		e.preventDefault();
 		e.stopPropagation();
-
-		console.log('handleDrag', e.type);
 
 		if (e.type === 'dragenter' || e.type === 'dragover') {
 			/**
@@ -55,7 +53,7 @@
 		if (e.dataTransfer?.files && e.dataTransfer.files[0]) {
 			const file = e.dataTransfer.files[0];
 			trackImageUpload(file);
-			onfileSelected(file);
+			onFileSelected(file);
 		}
 	};
 
@@ -71,15 +69,17 @@
 		if (e.target && e.target instanceof HTMLInputElement && e.target.files && e.target.files[0]) {
 			const file = e.target.files[0];
 			trackImageUpload(file);
-			onfileSelected(file);
+			onFileSelected(file);
 		}
 	};
 </script>
 
-
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-	class={cn("px-4 fixed left-0 top-0 flex h-screen w-screen flex-col items-center justify-center gap-8", "md:p-0")}
+	class={cn(
+		'fixed top-0 left-0 flex h-screen w-screen flex-col items-center justify-center gap-8 px-4',
+		'md:p-0'
+	)}
 	ondragenter={handleDrag}
 	ondragover={handleDrag}
 	ondragleave={handleDrag}
@@ -89,7 +89,7 @@
 >
 	<div
 		class={cn(
-			'fixed left-0 top-0 -z-10 flex h-screen w-screen flex-col items-center justify-center space-y-6 bg-background opacity-0 transition-opacity duration-100',
+			'bg-background fixed top-0 left-0 -z-10 flex h-screen w-screen flex-col items-center justify-center space-y-6 opacity-0 transition-opacity duration-100',
 			dragActive && 'z-10 opacity-100'
 		)}
 	>
