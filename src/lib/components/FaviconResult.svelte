@@ -42,15 +42,16 @@
 </script>
 
 <div class="flex flex-col items-center space-y-8 text-center" in:fade>
-	<img
-		src={faviconUrl}
-		alt="Generated favicon"
-		class={cn(
-			'size-[64px] cursor-pointer rounded-lg shadow-md',
-			'transition-transform duration-300 ease-in-out hover:scale-105'
-		)}
-		onclick={handleDownload}
-	/>
+	<button type="button" onclick={handleDownload} class="cursor-pointer">
+		<img
+			src={faviconUrl}
+			alt="Generated favicon"
+			class={cn(
+				'size-[64px] rounded-lg shadow-md',
+				'transition-transform duration-300 ease-in-out hover:scale-105'
+			)}
+		/>
+	</button>
 	<div class="flex flex-col items-center gap-2">
 		<p class="text-lg font-semibold">Your favicon is ready!</p>
 		<span class="text-muted-foreground text-sm">It should be downloaded automatically.</span>

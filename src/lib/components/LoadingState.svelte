@@ -24,7 +24,7 @@
 	{#if file}
 		<img src={URL.createObjectURL(file)} alt="Loading" class="size-32 rounded-xl shadow-md" />
 	{:else}
-		<div class="bg-muted size-32 rounded-xl shadow-md" />
+		<div class="bg-muted size-32 rounded-xl shadow-md"></div>
 	{/if}
 	<p class="text-muted-foreground text-sm">Processing...</p>
 	<Progress class="h-2" value={progress} />

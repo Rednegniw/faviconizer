@@ -54,6 +54,7 @@
 		"@supabase/supabase-js": "^2.97.0",
 		"@upstash/ratelimit": "^2.0.8",
 		"@upstash/redis": "^1.36.2",
+		"@vercel/analytics": "^1.6.1",
 		"cropperjs": "^2",
 		"lucide-svelte": "^0.575.0",
 		"posthog-js": "^1.352.0",

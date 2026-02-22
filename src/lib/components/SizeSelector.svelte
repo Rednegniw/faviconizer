@@ -13,9 +13,8 @@
 		.min(8, 'Size must be at least 8px')
 		.max(128, 'Size must be at most 128px');
 
-	let size = $derived($faviconSize);
 	let error = $state<string | null>(null);
-	let inputValue = $state(size.toString());
+	let inputValue = $state($faviconSize.toString());
 
 	const validate = (value: string) => {
 		try {
